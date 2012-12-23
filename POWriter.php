@@ -2,10 +2,8 @@
 
 namespace Kunststube\POTools;
 
-require_once __DIR__ . DIRECTORY_SEPARATOR . 'POWriterInterface.php';
 
-
-class POWriter implements POWriterInterface {
+class POWriter {
     
     protected $stream;
     
@@ -19,12 +17,6 @@ class POWriter implements POWriterInterface {
         $this->writeMsgid($string);
         $this->writeMsgstr($string);
         $this->writeLine(null);
-    }
-    
-    public function writeCatalog(Catalog $catalog) {
-        foreach ($catalog as $string) {
-            $this->write($string);
-        }
     }
     
     protected function writeReference(POString $string) {

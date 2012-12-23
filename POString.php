@@ -24,10 +24,6 @@ class POString {
         $this->setMsgidPlural($msgidPlural);
     }
 
-    public function getId() {
-        return "$this->category\04$this->domain\04$this->msgctxt\04$this->msgid";
-    }
-
     public function setCategory($category) {
         try {
             $this->categoryToText($category);
