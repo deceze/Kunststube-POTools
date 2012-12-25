@@ -40,10 +40,12 @@ class POWriter {
     
     protected function writeMsgstr(POString $string) {
         $msgstr = $string->getMsgstr();
-        if ($string->getMsgidPlural()) {
+        if ($string->getMsgidPlural() && $msgstr) {
             for ($i = 0, $length = count($msgstr); $i < $length; $i++) {
                 $this->writeLine(sprintf('msgstr[%d] %s', $i, $this->quote($msgstr[$i])));
             }
+        } else if ($string->getMsgidPlural()) {
+            $this->writeLine('msgstr[0] ""');
         } else if ($msgstr) {
             $this->writeLine(sprintf('msgstr %s', $this->quote($msgstr[0])));
         } else {
