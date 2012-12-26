@@ -12,7 +12,7 @@ class POString {
               $msgstr = array(),
               $msgctxt,
               $translatorComment,
-              $extractedComment,
+              $extractedComments,
               $references = array(),
               $fuzzy = false,
               $flags = array(),
@@ -114,12 +114,16 @@ class POString {
         return $this->translatorComment;
     }
     
-    public function setExtractedComment($comment) {
-        $this->extractedComment = $comment;
+    public function addExtractedComment($comment) {
+        $this->extractedComments[] = $comment;
     }
     
-    public function getExtractedComment() {
-        return $this->extractedComment;
+    public function setExtractedComments(array $comments) {
+        $this->extractedComments = $comments;
+    }
+    
+    public function getExtractedComments() {
+        return $this->extractedComments;
     }
     
     public function addReference($reference) {
