@@ -1,0 +1,71 @@
+#! /bin/bash
+
+# Kunststube\POTools .pot to .po file updater.
+# Takes two parameters: path to a locale directory
+# and name of the master locale. Merges all .pot files
+# of the master locale into equivalent .po files
+# of all other locales.
+
+if [ $# -ne 2 ]
+    then
+        echo "Missing parameters. Usage:"
+        echo
+        echo "   $0 <path-to-locale-dir> <master-locale>"
+        echo
+        exit 1
+fi
+
+LOCALEDIR="$1"
+MASTERLOCALE="$2"
+
+if [ ! -d "$LOCALEDIR" ]
+    then
+        echo "Error: Directory '$LOCALEDIR' not found"
+        echo
+        exit 1
+fi
+
+if [ ! -d "$LOCALEDIR/$MASTERLOCALE" ]
+    then
+        echo "Error: Directory '$LOCALEDIR/$MASTERLOCALE' not found"
+        echo
+        exit 1
+fi
+
+MASTERLOCALEDIR="$LOCALEDIR/$MASTERLOCALE"
+POTFILES=( $(find "$MASTERLOCALEDIR" -type f -name "*.pot") )
+
+echo "Found ${#POTFILES[@]} master locale files in '$MASTERLOCALEDIR':"
+echo ${POTFILES[@]//$MASTERLOCALEDIR\/}
+echo
+
+LOCALES=( $(find "$LOCALEDIR" -type d -depth 1 \! -name "$MASTERLOCALE") )
+
+echo "Found ${#LOCALES[@]} locale(s) in '$LOCALEDIR':"
+echo ${LOCALES[@]//$LOCALEDIR\/}
+echo
+
+for locale in "${LOCALES[@]}"
+do
+    echo "Processing ${locale#$LOCALEDIR\/}..."
+    echo
+    
+    for potFile in "${POTFILES[@]}"
+    do
+        poFile="$locale/${potFile#$MASTERLOCALEDIR\/}"
+        poFile="${poFile%t}"
+        
+        if [ ! -f $poFile ]
+            then
+                echo "Equivalent '$poFile' for '$potFile' does not exist, please initialize it first."
+                echo "Skipping..."
+                echo
+                continue
+        fi
+        
+        echo "Merging $potFile -> $poFile..."
+        msgmerge -Uv --previous --no-wrap "$poFile" "$potFile"
+        echo
+    done
+
+done
