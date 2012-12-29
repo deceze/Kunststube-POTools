@@ -113,12 +113,27 @@ class POString {
         return $this->translatorComment;
     }
     
+    /**
+     * Add a comment automatically extracted from source code.
+     * If the comment contains an xgettext format flag on a single
+     * line, the flag will automatically be added (see
+     * http://www.gnu.org/software/gettext/manual/gettext.html#c_002dformat-Flag).
+     * 
+     * @param string $comment
+     */
     public function addExtractedComment($comment) {
         $this->extractedComments[] = $comment;
+        $this->processCommentFlags($comment);
     }
     
+    /**
+     * Replaces all extracted comments with a new set of comments.
+     * 
+     * @param array $comments An array of strings.
+     */
     public function setExtractedComments(array $comments) {
-        $this->extractedComments = $comments;
+        $this->extractedComments = array();
+        array_map(array($this, 'addExtractedComment'), $comments);
     }
     
     public function getExtractedComments() {
@@ -137,15 +152,33 @@ class POString {
         return $this->references;
     }
     
+    /**
+     * Add a flag. Format flags are binary, a "no-php-format"
+     * flag will replace a "php-format" flag and vice versa.
+     * 
+     * @param string $flag One of "no-*-format", "*-format", "fuzzy", "range: n..m"
+     */
     public function addFlag($flag) {
         $flag = strtolower($flag);
+        if (preg_match('/^(?:no-)?(\w+-format)$/', $flag, $match)) {
+            $this->removeFlag($match[0]);
+            $this->removeFlag($match[1]);
+        }
         if (!in_array($flag, $this->flags)) {
             $this->flags[] = $flag;
         }
     }
     
     public function setFlags(array $flags) {
-        $this->flags = $flags;
+        $this->flags = array();
+        array_map(array($this, 'addFlag'), $flags);
+    }
+    
+    public function removeFlag($flag) {
+        $index = array_search($flag, $this->flags, true);
+        if ($index !== false) {
+            $this->flags = array_splice($this->flags, $index, 1);
+        }
     }
     
     public function getFlags() {
@@ -174,6 +207,12 @@ class POString {
     
     public function getPreviousMsgid() {
         return $this->previousMsgid;
+    }
+    
+    protected function processCommentFlags($comment) {
+        if (preg_match('/^\s*xgettext:((?:no-)?\w+-format)\s*$/m', $comment, $match)) {
+            $this->addFlag($match[1]);
+        }
     }
     
 }
