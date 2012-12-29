@@ -7,21 +7,76 @@ class POWriter {
     
     protected $stream;
     
+    /**
+     * @param resource $stream A stream pointer resource to which the PO data is written.
+     *                         Defaults to stdout.
+     * @throws \InvalidArgumentException
+     */
     public function __construct($stream = STDOUT) {
+        if (!is_resource($stream)) {
+            throw new \InvalidArgumentException('$stream must be a file/stream pointer resource, got ' . gettype($stream));
+        }
+        if (!in_array(get_resource_type($stream), array('file', 'stream'))) {
+            throw new \InvalidArgumentException('$stream must be a stream pointer resource, got ' . get_resource_type($stream));
+        }
         $this->stream = $stream;
     }
     
+    /**
+     * Write the complete entry for one POString to the stream.
+     * 
+     * @param POString $string
+     */
     public function write(POString $string) {
+        $this->writeTranslatorComment($string);
+        $this->writeExtractedComments($string);
         $this->writeReference($string);
+        $this->writeFlags($string);
+        $this->writePreviousMsgctxt($string);
+        $this->writePreviousMsgid($string);
         $this->writeMsgctxt($string);
         $this->writeMsgid($string);
         $this->writeMsgstr($string);
         $this->writeLine(null);
     }
     
+    protected function writeTranslatorComment(POString $string) {
+        if ($comments = $string->getTranslatorComment()) {
+            foreach (explode("\n", $comments) as $commentLine) {
+                $this->writeLine(sprintf('# %s', $commentLine));
+            }
+        }
+    }
+    
+    protected function writeExtractedComments(POString $string) {
+        foreach ($string->getExtractedComments() as $comment) {
+            foreach (explode("\n", $comment) as $commentLine) {
+                $this->writeLine(sprintf('#. %s', $commentLine));
+            }
+        }
+    }
+    
     protected function writeReference(POString $string) {
         foreach ($string->getReferences() as $reference) {
             $this->writeLine(sprintf('#: %s', $reference));
+        }
+    }
+    
+    protected function writeFlags(POString $string) {
+        if ($flags = $string->getFlags()) {
+            $this->writeLine(sprintf('#, %s', implode(', ', $flags)));
+        }
+    }
+    
+    protected function writePreviousMsgctxt(POString $string) {
+        if ($msgctxt = $string->getPreviousMsgctxt()) {
+            $this->writeLine(sprintf('#| msgctxt %s', $msgctxt));
+        }
+    }
+
+    protected function writePreviousMsgid(POString $string) {
+        if ($msgid = $string->getPreviousMsgid()) {
+            $this->writeLine(sprintf('#| msgid %s', $msgid));
         }
     }
     

@@ -3,7 +3,7 @@
 namespace Kunststube\POTools;
 
 
-class Catalog {
+class Catalog implements \IteratorAggregate {
     
     protected $strings = array();
     
@@ -14,13 +14,15 @@ class Catalog {
         
         if (isset($this->strings[$category][$domain][$id])) {
             array_map(array($this->strings[$category][$domain][$id], 'addReference'), $string->getReferences());
+            array_map(array($this->strings[$category][$domain][$id], 'addExtractedComment'), $string->getExtractedComments());
         } else {
             $this->strings[$category][$domain][$id] = $string;
         }
     }
     
-    public function getStrings() {
-        return $this->strings;
+    public function getIterator() {
+        require_once __DIR__ . DIRECTORY_SEPARATOR . 'RecursiveArrayOnlyIterator.php';
+        return new \RecursiveIteratorIterator(new RecursiveArrayOnlyIterator($this->strings));
     }
  
     public function writeToDirectory($path, POWriterFactory $writerFactory = null) {

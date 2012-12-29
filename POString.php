@@ -5,19 +5,18 @@ namespace Kunststube\POTools;
 
 class POString {
     
-    protected $category = LC_MESSAGES,
-              $domain = 'default',
-              $msgid,
-              $msgidPlural,
-              $msgstr = array(),
-              $msgctxt,
-              $translatorComment,
-              $extractedComments,
-              $references = array(),
-              $fuzzy = false,
-              $flags = array(),
-              $previousMsgctxt,
-              $previousMsgid;
+    protected $category          = LC_MESSAGES,
+              $domain            = 'default',
+              $msgid             = null,
+              $msgidPlural       = null,
+              $msgstr            = array(),
+              $msgctxt           = null,
+              $translatorComment = null,
+              $extractedComments = array(),
+              $references        = array(),
+              $flags             = array(),
+              $previousMsgctxt   = null,
+              $previousMsgid     = null;
     
     public function __construct($msgid, $msgidPlural = null) {
         $this->setMsgid($msgid);
@@ -130,27 +129,16 @@ class POString {
         $this->references[] = $reference;
     }
     
-    public function setReferences($references) {
-        $this->references = (array)$references;
+    public function setReferences(array $references) {
+        $this->references = $references;
     }
     
     public function getReferences() {
         return $this->references;
     }
     
-    public function setFuzzy($fuzzy) {
-        $this->fuzzy = (bool)$fuzzy;
-    }
-    
-    public function isFuzzy() {
-        return $this->fuzzy;
-    }
-    
-    public function getFuzzy() {
-        return $this->isFuzzy();
-    }
-    
     public function addFlag($flag) {
+        $flag = strtolower($flag);
         if (!in_array($flag, $this->flags)) {
             $this->flags[] = $flag;
         }
@@ -162,6 +150,14 @@ class POString {
     
     public function getFlags() {
         return $this->flags;
+    }
+
+    public function hasFlag($flag) {
+        return in_array(strtolower($flag), $this->flags);
+    }
+    
+    public function isFuzzy() {
+        return $this->hasFlag('fuzzy');
     }
     
     public function setPreviousMsgctxt($msgctxt) {
