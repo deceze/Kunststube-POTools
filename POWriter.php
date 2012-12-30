@@ -5,14 +5,15 @@ namespace Kunststube\POTools;
 
 class POWriter {
     
-    protected $stream;
+    protected $stream,
+              $outputWritten = false;
     
     /**
      * @param resource $stream A stream pointer resource to which the PO data is written.
      *                         Defaults to stdout.
      * @throws \InvalidArgumentException
      */
-    public function __construct($stream = STDOUT) {
+    public function __construct($stream = STDOUT, Catalog $catalog = null) {
         if (!is_resource($stream)) {
             throw new \InvalidArgumentException('$stream must be a file/stream pointer resource, got ' . gettype($stream));
         }
@@ -20,6 +21,36 @@ class POWriter {
             throw new \InvalidArgumentException('$stream must be a stream pointer resource, got ' . get_resource_type($stream));
         }
         $this->stream = $stream;
+        
+        if ($catalog) {
+            $this->writeHeader($catalog);
+        }
+    }
+    
+    public function writeHeader(Catalog $catalog) {
+        if ($this->outputWritten) {
+            throw new \LogicException('Cannot write header, output already written');
+        }
+        $this->outputWritten = true;
+        
+        $this->writeLine('msgid ""');
+        $this->writeLine('msgstr ""');
+        $this->writeLine(sprintf('"Project-Id-Version: %s\n"',               $catalog->getProjectIdVersion()));
+        $this->writeLine(sprintf('"Report-Msgid-Bugs-To: %s\n"',             $catalog->getMsgidBugReportingAddress()));
+        $this->writeLine(sprintf('"POT-Creation-Date: %s\n"',                $catalog->getPotCreationDate()));
+        $this->writeLine(sprintf('"PO-Revision-Date: %s\n"',                 $catalog->getPoRevisionDate()));
+        $this->writeLine(sprintf('"Last-Translator: %s\n"',                  $catalog->getLastTranslator()));
+        $this->writeLine(sprintf('"Language-Team: %s\n"',                    $catalog->getLanguageTeam()));
+        $this->writeLine(sprintf('"Language: %s\n"',                         $catalog->getLanguage()));
+        $this->writeLine('"MIME-Version: 1.0\n"');
+        $this->writeLine(sprintf('"Content-Type: text/plain; charset=%s\n"', $catalog->getEncoding()));
+        $this->writeLine('"Content-Transfer-Encoding: 8bit\n"');
+        
+        if ($pluralForms = $catalog->getPluralForms()) {
+            $this->writeLine(sprintf('"Plural-Forms: %s\n"', $pluralForms));
+        }
+        
+        $this->writeLine(null);
     }
     
     /**
