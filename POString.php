@@ -6,7 +6,7 @@ namespace Kunststube\POTools;
 class POString {
     
     protected $category          = LC_MESSAGES,
-              $domain            = 'default',
+              $domain            = 'messages',
               $msgid             = null,
               $msgidPlural       = null,
               $msgstr            = array(),
