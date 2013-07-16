@@ -39,7 +39,7 @@ echo "Found ${#POTFILES[@]} master locale files in '$MASTERLOCALEDIR':"
 echo ${POTFILES[@]//$MASTERLOCALEDIR\/}
 echo
 
-LOCALES=( $(find "$LOCALEDIR" -type d -depth 1 \! -name "$MASTERLOCALE") )
+LOCALES=( $(find -H "$LOCALEDIR" -type d -depth 1 \! -name "$MASTERLOCALE" \! -name ".*") )
 
 echo "Found ${#LOCALES[@]} locale(s) in '$LOCALEDIR':"
 echo ${LOCALES[@]//$LOCALEDIR\/}
