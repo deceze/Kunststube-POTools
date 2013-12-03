@@ -144,7 +144,10 @@ class POWriter {
     }
     
     protected function quote($string) {
-        return sprintf('"%s"', addcslashes($string, '"'));
+        $string = addcslashes($string, '"');
+        // replace line breaks with a literal \n, closing quotes, a line break and opening quotes
+        $string = str_replace("\n", "\\n\"\n\"", $string);
+        return sprintf('"%s"', $string);
     }
     
 }
