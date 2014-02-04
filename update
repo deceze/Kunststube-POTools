@@ -34,6 +34,7 @@ fi
 
 MASTERLOCALEDIR="$LOCALEDIR/$MASTERLOCALE"
 POTFILES=( $(find "$MASTERLOCALEDIR" -type f -name "*.pot") )
+[ -d "$LOCALEDIR/.git" ] && DOBACKUP="--backup=none"
 
 echo "Found ${#POTFILES[@]} master locale files in '$MASTERLOCALEDIR':"
 echo ${POTFILES[@]//$MASTERLOCALEDIR\/}
@@ -64,7 +65,7 @@ do
         fi
         
         echo "Merging $potFile -> $poFile..."
-        msgmerge -Uv --previous --no-wrap "$poFile" "$potFile"
+        msgmerge -Uv $DOBACKUP --previous --no-wrap "$poFile" "$potFile"
         echo
     done
 
